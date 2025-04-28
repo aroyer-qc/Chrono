@@ -4,10 +4,7 @@ project(Chronometer LANGUAGES CXX)
 set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
-
-#! [0]
-find_package(Qt6)
-#! [0]
+#find_package(Qt6)
 
 qt_add_executable(Chronometer
     main.cpp
@@ -26,9 +23,3 @@ target_link_libraries(Chronometer PUBLIC
     Qt::Gui
     Qt::Widgets
 )
-
-#install(TARGETS Chronometer
-#    RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"
-#    BUNDLE DESTINATION "${INSTALL_EXAMPLEDIR}"
-#    LIBRARY DESTINATION "${INSTALL_EXAMPLEDIR}"
-#)

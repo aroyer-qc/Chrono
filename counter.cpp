@@ -3,13 +3,9 @@
 #include <QElapsedTimer>
 #include <QLatin1Char>
 #include <QThread>
-//#include <math.h>
 
-Counter::Counter(QObject *parent) :
-    QObject(parent)
+Counter::Counter(QObject *parent) : QObject(parent)
 {
-    //StopFlag = false;
-    //StartFlag = false;
     ResetChronometer();
 }
 
@@ -30,7 +26,11 @@ void Counter::StartChronometer()
 
     if(Seconds == 60)
     {
-        if(Time >= 1000) Time = Time - 1000;
+        if(Time >= 1000)
+        {
+            Time = Time - 1000;
+        }
+        
         Seconds = 0;
         Minutes++;
     }

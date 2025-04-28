@@ -26,7 +26,7 @@ class MainWindow : public QWidget
 
   private:
 
-    QPixmap backgroundImage; // Private member to store the background image
+    QPixmap BackgroundImage; // Private member to store the background image
     QPoint dragPosition;
     QLabel* labelStaticLCD_100_Min;
     QLabel* labelStaticLCD_10_Min;
@@ -48,8 +48,14 @@ class MainWindow : public QWidget
     int StartFlag;
     int StopFlag;
     int LapCounter;
-    QString LapTime;
 
+    //QString LapTime;
+
+    // LapWindow variable
+    QWidget* LapWindow;
+    QPoint ParentTopLeft;
+    bool LapWindowFlag;
+    
 
     void ResetLCD();
     void UpdateLCD(QString Data);

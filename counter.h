@@ -20,9 +20,6 @@ class Counter : public QObject
 
     private:
         QTime Timer;
-       // bool StartFlag;
-       // bool StopFlag;
-//        long End;
         uint Time;
         uint Minutes;
         uint Seconds;

@@ -3,9 +3,12 @@
 #include <QMouseEvent>
 #include <QPushButton>
 #include <QLabel>
+#include <QPropertyAnimation>       // test
 #include "counter.h"
 
-MainWindow::MainWindow(const QString& imagePath)
+//*************************************************************************************************
+
+MainWindow::MainWindow(const QString& ImagePath)
 {
     StartFlag = 0;
     LapCounter = 0;
@@ -24,10 +27,10 @@ MainWindow::MainWindow(const QString& imagePath)
     setAttribute(Qt::WA_TranslucentBackground);
 
     // Load the background image
-    backgroundImage = QPixmap(imagePath);
+    BackgroundImage = QPixmap(ImagePath);
 
     // Set the mask to match the shape of the image (for irregular shapes)
-    setMask(backgroundImage.mask());
+    setMask(BackgroundImage.mask());
 
     // Create button
     buttonStart = new QPushButton(" Start", this);
@@ -40,17 +43,17 @@ MainWindow::MainWindow(const QString& imagePath)
     buttonReset->setIcon(QIcon(":/icons/Ressource/reset.png"));
 
     // Set the button's styles
-    QString Style = "QPushButton {"
-                    "background-color: transparent;" // Makes the button transparent
-                    "color: white;"                  // Sets text color to white
-                    "border: none;"                  // Removes any border
-                    "}"
-                    "QPushButton:pressed {"
-                    "   color: lightgray;"           // Change text color to white when pressed
-                    "}";
-    buttonStart->setStyleSheet(Style);
-    buttonLap->setStyleSheet(Style);
-    buttonReset->setStyleSheet(Style);
+    QString ButtonStyle = "QPushButton {"
+                          "background-color: transparent;" // Makes the button transparent
+                          "color: white;"                  // Sets text color to white
+                          "border: none;"                  // Removes any border
+                          "}"
+                          "QPushButton:pressed {"
+                          "   color: lightgray;"           // Change text color to white when pressed
+                          "}";
+    buttonStart->setStyleSheet(ButtonStyle);
+    buttonLap->setStyleSheet(ButtonStyle);
+    buttonReset->setStyleSheet(ButtonStyle);
 
     buttonStart->resize(60, 20);
     buttonStart->move(47, 127);
@@ -65,7 +68,6 @@ MainWindow::MainWindow(const QString& imagePath)
     connect(buttonStart, &QPushButton::clicked, this, &MainWindow::onButtonStartClicked);
     connect(buttonLap, &QPushButton::clicked, this, &MainWindow::onButtonLapClicked);
     connect(buttonReset, &QPushButton::clicked, this, &MainWindow::onButtonResetClicked);
-
 
     QString StyleSheet("font-family: 'DS-Digital'; font-size: 48px; font-weight: bold; color: #202020;");
 
@@ -135,7 +137,36 @@ MainWindow::MainWindow(const QString& imagePath)
     labelLCD_1_HundredSEC->raise();
 
     ResetLCD();
+    
+    // Lap Window
+    LapWindowFlag = 0;
+    LapWindow = new QWidget(this);
+    LapWindow->resize(200, 150);
+    LapWindow->setWindowTitle("Lap Window");
+    ParentTopLeft = this->geometry().topLeft();
+    LapWindow->move(150,150);//ParentTopLeft + QPoint(150, 150));                          // Off-screen position                           // Initially place the child window behind the parent
+
+    // Set the window flags for LapWindow (frameless and transparent)
+    LapWindow->setWindowFlags(Qt::Window);
+//    LapWindow->setWindowFlags(Qt::FramelessWindowHint | Qt::Window);
+    LapWindow->setAttribute(Qt::WA_TranslucentBackground);
+    QPixmap lapBackgroundImage(":/icons/Ressource/chrono.png");                 // Load the background image for LapWindow
+      QPainter painter(LapWindow);
+    painter.drawPixmap(0, 0, lapBackgroundImage);                             // Draw the background image
+
+    // Add the reset lap button to the child window
+    QPushButton* ButtonResetLapHistory = new QPushButton("Reset Lap History", LapWindow);
+    ButtonResetLapHistory->setStyleSheet(ButtonStyle);
+    ButtonResetLapHistory->resize(60, 20);
+    ButtonResetLapHistory->move(20, 200); // Position button within the child window
+    connect(ButtonResetLapHistory, &QPushButton::clicked, LapWindow, &QWidget::close);
+    //connect(buttonStart, &QPushButton::clicked, this, &MainWindow::onButtonStartClicked);
+
+
+    LapWindow->show();                                                          // Ensure LapWindow is visible
 }
+
+//*************************************************************************************************
 
 MainWindow::~MainWindow()
 {
@@ -143,68 +174,80 @@ MainWindow::~MainWindow()
     CounterThread.wait();
 }
 
+//*************************************************************************************************
+
 // Public method to get background image
 const QPixmap MainWindow::getBackgroundImage()
 {
-    return backgroundImage;
+    return BackgroundImage;
 }
+
+//*************************************************************************************************
 
 void MainWindow::ResetLCD()
 {
     UpdateLCD("  0:00:00");
 }
 
-void MainWindow::UpdateLCD(QString data)
+//*************************************************************************************************
+
+void MainWindow::UpdateLCD(QString Data)
 {
     // this function fix bad offset into the DS_Digital Font for number 1
-    labelLCD_100_Min->move(data.at(0) == '1' ? 60 : 48, 62);
-    labelLCD_10_Min->move(data.at(1) == '1' ? 85 : 73, 62);
-    labelLCD_1_Min->move(data.at(2) == '1' ? 110 : 98, 62);
-    labelLCD_10_Sec->move(data.at(4) == '1' ? 150 : 138, 62);
-    labelLCD_1_Sec->move(data.at(5) == '1' ? 175 : 163, 62);
-    labelLCD_10_HundredSEC->move(data.at(7) == '1' ? 215 : 203, 62);
-    labelLCD_1_HundredSEC->move(data.at(8) == '1' ? 240 : 228, 62);
+    labelLCD_100_Min->move(Data.at(0) == '1' ? 60 : 48, 62);
+    labelLCD_10_Min->move(Data.at(1) == '1' ? 85 : 73, 62);
+    labelLCD_1_Min->move(Data.at(2) == '1' ? 110 : 98, 62);
+    labelLCD_10_Sec->move(Data.at(4) == '1' ? 150 : 138, 62);
+    labelLCD_1_Sec->move(Data.at(5) == '1' ? 175 : 163, 62);
+    labelLCD_10_HundredSEC->move(Data.at(7) == '1' ? 215 : 203, 62);
+    labelLCD_1_HundredSEC->move(Data.at(8) == '1' ? 240 : 228, 62);
 
-    labelLCD_100_Min->setText(data.at(0));
-    labelLCD_10_Min->setText(data.at(1));
-    labelLCD_1_Min->setText(data.at(2));
-    labelLCD_10_Sec->setText(data.at(4));
-    labelLCD_1_Sec->setText(data.at(5));
-    labelLCD_10_HundredSEC->setText(data.at(7));
-    labelLCD_1_HundredSEC->setText(data.at(8));
+    labelLCD_100_Min->setText(Data.at(0));
+    labelLCD_10_Min->setText(Data.at(1));
+    labelLCD_1_Min->setText(Data.at(2));
+    labelLCD_10_Sec->setText(Data.at(4));
+    labelLCD_1_Sec->setText(Data.at(5));
+    labelLCD_10_HundredSEC->setText(Data.at(7));
+    labelLCD_1_HundredSEC->setText(Data.at(8));
 
-    if(StartFlag == 1) emit StartChronometer();
-    LapTime = data;
+    //LapTime = Data;
 }
 
-void MainWindow::paintEvent(QPaintEvent* event)
+//*************************************************************************************************
+
+
+void MainWindow::paintEvent(QPaintEvent* Event)
 {
-    Q_UNUSED(event);
+    Q_UNUSED(Event);
     QPainter painter(this);
-
-    // Draw the background image
-    painter.drawPixmap(0, 0, backgroundImage);
+    painter.drawPixmap(0, 0, BackgroundImage);                  // Draw the background image
 }
 
-void MainWindow::mousePressEvent(QMouseEvent* event)
+//*************************************************************************************************
+
+void MainWindow::mousePressEvent(QMouseEvent* Event)
 {
-    // Allow dragging the window by clicking anywhere
-    if(event->button() == Qt::LeftButton)
+    if(Event->button() == Qt::LeftButton)                       // Allow dragging the window by clicking anywhere
     {
-        dragPosition = (event->globalPosition().toPoint() - frameGeometry().topLeft());
-        event->accept();
+        dragPosition = (Event->globalPosition().toPoint() - frameGeometry().topLeft());
+        Event->accept();
     }
 }
 
-void MainWindow::mouseMoveEvent(QMouseEvent* event)
+//*************************************************************************************************
+
+void MainWindow::mouseMoveEvent(QMouseEvent* Event)
 {
-    // Handle dragging the window
-    if(event->buttons() & Qt::LeftButton)
+    if(Event->buttons() & Qt::LeftButton)                       // Handle dragging the window
     {
-        move(event->globalPosition().toPoint() - dragPosition);
-        event->accept();
+        move(Event->globalPosition().toPoint() - dragPosition);
+        ParentTopLeft = this->geometry().topLeft();
+        LapWindow->move(ParentTopLeft + QPoint(150, 150));
+        Event->accept();
     }
 }
+
+//*************************************************************************************************
 
 void MainWindow::onButtonStartClicked()
 {
@@ -220,38 +263,47 @@ void MainWindow::onButtonStartClicked()
     {
         buttonStart->setIcon(QIcon(":/icons/Ressource/start.png"));
         buttonStart->setText("Start");
+        emit StartChronometer();
         StartFlag = 0;
         StopFlag = 0;
     }
-
-    //QIcon darkIcon("C:/path_to_darkened_icon.png"); // Use a darker version of the icon
-    //button.setIcon(darkIcon);
-
-
 }
+
+//*************************************************************************************************
 
 void MainWindow::onButtonLapClicked()
 {
-    // Action performed when the button is clicked
-    qDebug("Button lap clicked!");
+    QPoint CurrentPosition = LapWindow->pos();                                      // Get the current position of the widget
+    QPropertyAnimation* animation = new QPropertyAnimation(LapWindow, "geometry");
+    animation->setDuration(1000);                                                   // Animation duration in milliseconds
 
-    //QIcon darkIcon("C:/path_to_darkened_icon.png"); // Use a darker version of the icon
-    //button.setIcon(darkIcon);
+    if(LapWindowFlag == 0)
+    {
+        animation->setStartValue(LapWindow->geometry().topLeft());                            // Starting position
+        animation->setEndValue(QPoint(CurrentPosition.x(),
+                                      CurrentPosition.y()));                                         // Ending position (on-screen)
+        LapWindowFlag = 1;
+    }
+    else
+    {
+        animation->setStartValue(LapWindow->geometry().topLeft());
+        animation->setEndValue(this->geometry().topLeft());                             // Ending position (on-screen)
+        LapWindowFlag = 0;
+    }
 
-
+    animation->start();
+    //animation->start(QAbstractAnimation::DeleteWhenStopped);                        // Automatically delete when finished
 }
+
+//*************************************************************************************************
 
 void MainWindow::onButtonResetClicked()
 {
     ResetLCD();
     emit ResetChronometer();
-
-
-    //QIcon darkIcon("C:/path_to_darkened_icon.png"); // Use a darker version of the icon
-    //button.setIcon(darkIcon);
-
-
 }
+
+//*************************************************************************************************
 
 void MainWindow::CounterFinish(QString data)
 {
@@ -265,57 +317,5 @@ void MainWindow::CounterFinish(QString data)
    // LapTime = data;
 }
 
+//*************************************************************************************************
 
-/* exmaple to darken icon
-QObject::connect(&button, &QPushButton::released, [&]()
-{
-    button.setIcon(icon); // Restore original icon
-});
-*/
-
-
-
-
-
-
-// to animated the child window
-
-# if 0
-
-#include <QApplication>
-#include <QWidget>
-#include <QPropertyAnimation>
-#include <QPushButton>
-
-int main(int argc, char *argv[]) {
-    QApplication app(argc, argv);
-
-    QWidget parentWindow;
-    parentWindow.resize(400, 300);
-    parentWindow.setWindowTitle("Parent Window");
-
-    QWidget childWindow(&parentWindow);
-    childWindow.resize(200, 150);
-    childWindow.setWindowTitle("Child Window");
-
-    // Initially place the child window behind the parent
-    childWindow.move(-200, 75); // Off-screen position
-
-    QPushButton button("Animate Child", &parentWindow);
-    button.move(150, 250);
-
-    QObject::connect(&button, &QPushButton::clicked, [&]() {
-        // Set up the animation
-        QPropertyAnimation* animation = new QPropertyAnimation(&childWindow, "geometry");
-        animation->setDuration(1000); // Animation duration in milliseconds
-        animation->setStartValue(childWindow.geometry()); // Starting position
-        animation->setEndValue(QRect(100, 75, 200, 150)); // Ending position (on-screen)
-        animation->start();
-    });
-
-    parentWindow.show();
-
-    return app.exec();
-}
-
-#endif
