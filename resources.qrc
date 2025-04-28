@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>Ressource/chrono.png</file>
+        <file>Ressource/lap.png</file>
+        <file>Ressource/reset.png</file>
+        <file>Ressource/stop.png</file>
+        <file>Ressource/clock.png</file>
+        <file>Ressource/start.png</file>
+    </qresource>
+</RCC>
