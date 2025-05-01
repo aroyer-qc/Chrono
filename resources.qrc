@@ -6,5 +6,8 @@
         <file>Ressource/stop.png</file>
         <file>Ressource/clock.png</file>
         <file>Ressource/start.png</file>
+        <file>Ressource/chronolap.png</file>
+        <file>Ressource/cursor.png</file>
+        <file>Ressource/handle.png</file>
     </qresource>
 </RCC>

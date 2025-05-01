@@ -24,7 +24,7 @@ void Counter::StartChronometer()
         Seconds++;
     }
 
-    if(Seconds == 60)
+    if(Seconds >= 60)
     {
         if(Time >= 1000)
         {
@@ -33,6 +33,11 @@ void Counter::StartChronometer()
         
         Seconds = 0;
         Minutes++;
+
+        if(Minutes >= 1000)
+        {
+            ResetChronometer();
+        }
     }
 
     emit ResultReady(QString("%3:%2:%1")

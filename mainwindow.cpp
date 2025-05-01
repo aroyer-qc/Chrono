@@ -3,7 +3,7 @@
 #include <QMouseEvent>
 #include <QPushButton>
 #include <QLabel>
-#include <QPropertyAnimation>       // test
+#include <QPropertyAnimation>
 #include "counter.h"
 
 //*************************************************************************************************
@@ -11,7 +11,11 @@
 MainWindow::MainWindow(const QString& ImagePath)
 {
     StartFlag = 0;
-    LapCounter = 0;
+
+    QLabel* backgroundLabel = new QLabel(this);     // Parent is MainWindow
+    backgroundLabel->setPixmap(QPixmap(ImagePath));
+    backgroundLabel->lower(); // Push it below all other widgets
+    backgroundLabel->show();
 
     Counter* Counting = new Counter;
     Counting->moveToThread(&CounterThread);
@@ -25,12 +29,6 @@ MainWindow::MainWindow(const QString& ImagePath)
     // Set the window flags to remove frame and make the window transparent
     setWindowFlags(Qt::FramelessWindowHint | Qt::Window);
     setAttribute(Qt::WA_TranslucentBackground);
-
-    // Load the background image
-    BackgroundImage = QPixmap(ImagePath);
-
-    // Set the mask to match the shape of the image (for irregular shapes)
-    setMask(BackgroundImage.mask());
 
     // Create button
     buttonStart = new QPushButton(" Start", this);
@@ -69,7 +67,7 @@ MainWindow::MainWindow(const QString& ImagePath)
     connect(buttonLap, &QPushButton::clicked, this, &MainWindow::onButtonLapClicked);
     connect(buttonReset, &QPushButton::clicked, this, &MainWindow::onButtonResetClicked);
 
-    QString StyleSheet("font-family: 'DS-Digital'; font-size: 48px; font-weight: bold; color: #202020;");
+    QString StyleSheet("font-family: 'DS-Digital'; font-size: 48px; font-style: italic; font-weight: bold; color: #202020;");
 
     labelStaticLCD_100_Min = new QLabel("8", this);
     labelStaticLCD_100_Min->setStyleSheet(StyleSheet);
@@ -99,7 +97,7 @@ MainWindow::MainWindow(const QString& ImagePath)
     labelStaticLCD_1_HundredSEC->setStyleSheet(StyleSheet);
     labelStaticLCD_1_HundredSEC->move(228, 62);
 
-    StyleSheet = ("background-color: transparent; font-family: 'DS-Digital'; font-size: 48px; font-weight: bold; color: white;");
+    StyleSheet = ("background-color: transparent; font-family: 'DS-Digital'; font-style: italic; font-size: 48px; font-weight: bold; color: white;");
 
     labelLCD_100_Min = new QLabel(" ", this);
     labelLCD_100_Min->setStyleSheet(StyleSheet);
@@ -140,30 +138,20 @@ MainWindow::MainWindow(const QString& ImagePath)
     
     // Lap Window
     LapWindowFlag = 0;
-    LapWindow = new QWidget(this);
-    LapWindow->resize(200, 150);
-    LapWindow->setWindowTitle("Lap Window");
-    ParentTopLeft = this->geometry().topLeft();
-    LapWindow->move(150,150);//ParentTopLeft + QPoint(150, 150));                          // Off-screen position                           // Initially place the child window behind the parent
-
-    // Set the window flags for LapWindow (frameless and transparent)
-    LapWindow->setWindowFlags(Qt::Window);
-//    LapWindow->setWindowFlags(Qt::FramelessWindowHint | Qt::Window);
-    LapWindow->setAttribute(Qt::WA_TranslucentBackground);
-    QPixmap lapBackgroundImage(":/icons/Ressource/chrono.png");                 // Load the background image for LapWindow
-      QPainter painter(LapWindow);
-    painter.drawPixmap(0, 0, lapBackgroundImage);                             // Draw the background image
+    LapWindow = new class LapWindow(this);
+    LapWindow->setWindowFlags(Qt::Widget | Qt::FramelessWindowHint);
+    LapWindow->move(QPoint(0, 0));
+    LapWindow->show();                                          // Ensure LapWindow is visible
+    LapWindow->lower();
+    connect(LapWindow, &LapWindow::HideLapWindow, this, &MainWindow::HideLapWindow);
 
     // Add the reset lap button to the child window
     QPushButton* ButtonResetLapHistory = new QPushButton("Reset Lap History", LapWindow);
     ButtonResetLapHistory->setStyleSheet(ButtonStyle);
-    ButtonResetLapHistory->resize(60, 20);
-    ButtonResetLapHistory->move(20, 200); // Position button within the child window
-    connect(ButtonResetLapHistory, &QPushButton::clicked, LapWindow, &QWidget::close);
-    //connect(buttonStart, &QPushButton::clicked, this, &MainWindow::onButtonStartClicked);
-
-
-    LapWindow->show();                                                          // Ensure LapWindow is visible
+    ButtonResetLapHistory->setIcon(QIcon(":/icons/Ressource/reset.png"));
+    ButtonResetLapHistory->resize(140, 20);
+    ButtonResetLapHistory->move(60, 129); // Position button within the child window
+    connect(ButtonResetLapHistory, &QPushButton::clicked, this, &MainWindow::onButtonResetLapHistoryClicked);
 }
 
 //*************************************************************************************************
@@ -201,7 +189,6 @@ void MainWindow::UpdateLCD(QString Data)
     labelLCD_1_Sec->move(Data.at(5) == '1' ? 175 : 163, 62);
     labelLCD_10_HundredSEC->move(Data.at(7) == '1' ? 215 : 203, 62);
     labelLCD_1_HundredSEC->move(Data.at(8) == '1' ? 240 : 228, 62);
-
     labelLCD_100_Min->setText(Data.at(0));
     labelLCD_10_Min->setText(Data.at(1));
     labelLCD_1_Min->setText(Data.at(2));
@@ -209,18 +196,17 @@ void MainWindow::UpdateLCD(QString Data)
     labelLCD_1_Sec->setText(Data.at(5));
     labelLCD_10_HundredSEC->setText(Data.at(7));
     labelLCD_1_HundredSEC->setText(Data.at(8));
-
-    //LapTime = Data;
+    LapTime = Data;
 }
 
 //*************************************************************************************************
-
 
 void MainWindow::paintEvent(QPaintEvent* Event)
 {
     Q_UNUSED(Event);
     QPainter painter(this);
     painter.drawPixmap(0, 0, BackgroundImage);                  // Draw the background image
+    LapWindow->stackUnder(this);
 }
 
 //*************************************************************************************************
@@ -241,8 +227,6 @@ void MainWindow::mouseMoveEvent(QMouseEvent* Event)
     if(Event->buttons() & Qt::LeftButton)                       // Handle dragging the window
     {
         move(Event->globalPosition().toPoint() - dragPosition);
-        ParentTopLeft = this->geometry().topLeft();
-        LapWindow->move(ParentTopLeft + QPoint(150, 150));
         Event->accept();
     }
 }
@@ -273,26 +257,37 @@ void MainWindow::onButtonStartClicked()
 
 void MainWindow::onButtonLapClicked()
 {
-    QPoint CurrentPosition = LapWindow->pos();                                      // Get the current position of the widget
-    QPropertyAnimation* animation = new QPropertyAnimation(LapWindow, "geometry");
-    animation->setDuration(1000);                                                   // Animation duration in milliseconds
+    LapWindow->AddLapTime(LapTime);
 
     if(LapWindowFlag == 0)
     {
-        animation->setStartValue(LapWindow->geometry().topLeft());                            // Starting position
+        QPoint CurrentPosition = LapWindow->pos();                                      // Get the current position of the widget
+        QPropertyAnimation* animation = new QPropertyAnimation(LapWindow, "pos");
+        animation->setDuration(1000);                                                   // Animation duration in milliseconds
+
+        animation->setStartValue(CurrentPosition);                                      // Starting position
         animation->setEndValue(QPoint(CurrentPosition.x(),
-                                      CurrentPosition.y()));                                         // Ending position (on-screen)
+                                      CurrentPosition.y() + 180));                        // Ending position (on-screen)
+        animation->start(QAbstractAnimation::DeleteWhenStopped);                        // Automatically delete when finished
         LapWindowFlag = 1;
     }
-    else
+}
+
+//*************************************************************************************************
+void MainWindow::HideLapWindow()
+{
+    if(LapWindowFlag == 1)
     {
-        animation->setStartValue(LapWindow->geometry().topLeft());
-        animation->setEndValue(this->geometry().topLeft());                             // Ending position (on-screen)
+        QPoint CurrentPosition = LapWindow->pos();                                      // Get the current position of the widget
+        QPropertyAnimation* animation = new QPropertyAnimation(LapWindow, "pos");
+        animation->setDuration(1000);                                                   // Animation duration in milliseconds
+
+        animation->setStartValue(CurrentPosition);                            // Starting position
+        animation->setEndValue(QPoint(CurrentPosition.x(),
+                                      CurrentPosition.y() - 180));                        // Ending position (on-screen)
+        animation->start(QAbstractAnimation::DeleteWhenStopped);                        // Automatically delete when finished
         LapWindowFlag = 0;
     }
-
-    animation->start();
-    //animation->start(QAbstractAnimation::DeleteWhenStopped);                        // Automatically delete when finished
 }
 
 //*************************************************************************************************
@@ -305,6 +300,13 @@ void MainWindow::onButtonResetClicked()
 
 //*************************************************************************************************
 
+void MainWindow::onButtonResetLapHistoryClicked()
+{
+    LapWindow->ClearLaps();
+}
+
+//*************************************************************************************************
+
 void MainWindow::CounterFinish(QString data)
 {
     UpdateLCD(data);
@@ -313,8 +315,6 @@ void MainWindow::CounterFinish(QString data)
     {
         emit StartChronometer();
     }
-
-   // LapTime = data;
 }
 
 //*************************************************************************************************

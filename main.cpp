@@ -6,8 +6,8 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     // Provide the path to the background image
     MainWindow widget(":/icons/Ressource/chrono.png");
-
-    widget.resize(widget.getBackgroundImage().size()); // Use the public method to get the size
+    widget.setWindowFlags(Qt::Window | Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+    widget.resize(QSize(294, 368)); // Resize the widget with the new dimensions
 
     QIcon appIcon(":/icons/Ressource/clock.png");
     widget.setWindowIcon(appIcon);

@@ -1,6 +1,7 @@
 #! [0]
 SOURCES      = main.cpp \
     counter.cpp \
+    lapwindow.cpp \
     mainwindow.cpp
 #! [0] #! [1]
 TRANSLATIONS = Chronometer_la.ts
@@ -11,6 +12,7 @@ QT += widgets
 
 HEADERS += \
     counter.h \
+    lapwindow.h \
     mainwindow.h
 
 RESOURCES += \

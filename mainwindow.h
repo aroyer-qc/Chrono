@@ -1,10 +1,12 @@
 #include <QWidget>
+#include <qmainwindow.h>
 #include <QPixmap>
 #include <QPainter>
 #include <QMouseEvent>
 #include <QPushButton>
 #include <QLabel>
 #include <QThread>
+#include "lapwindow.h"
 
 class MainWindow : public QWidget
 {
@@ -13,12 +15,12 @@ class MainWindow : public QWidget
 
   public:
 
-    MainWindow(const QString& imagePath);
+    explicit MainWindow(const QString& imagePath);
     ~MainWindow();
 
     const QPixmap getBackgroundImage();
 
-  protected:
+protected:
 
     void paintEvent(QPaintEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
@@ -47,15 +49,10 @@ class MainWindow : public QWidget
     QPushButton* buttonReset;
     int StartFlag;
     int StopFlag;
-    int LapCounter;
 
-    //QString LapTime;
-
-    // LapWindow variable
-    QWidget* LapWindow;
-    QPoint ParentTopLeft;
+    LapWindow* LapWindow;
     bool LapWindowFlag;
-    
+    QString LapTime;
 
     void ResetLCD();
     void UpdateLCD(QString Data);
@@ -65,14 +62,14 @@ class MainWindow : public QWidget
     void onButtonStartClicked();
     void onButtonLapClicked();
     void onButtonResetClicked();
+    void onButtonResetLapHistoryClicked();
     void CounterFinish(QString data);
+    void HideLapWindow();
 
   signals:
 
     void StartChronometer();
     void ResetChronometer();
-
-
 };
 
 
