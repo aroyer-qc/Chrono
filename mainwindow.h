@@ -37,16 +37,16 @@ class MainWindow : public QWidget
 
   public:
 
-    explicit MainWindow(const QString& imagePath);
+    explicit MainWindow(const QString& ImagePath);
     ~MainWindow();
 
     const QPixmap getBackgroundImage();
 
 protected:
 
-    void paintEvent(QPaintEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseMoveEvent(QMouseEvent* event) override;
+    void paintEvent(QPaintEvent* Event) override;
+    void mousePressEvent(QMouseEvent* Event) override;
+    void mouseMoveEvent(QMouseEvent* Event) override;
 
   private:
 
@@ -85,7 +85,7 @@ protected:
     void onButtonLapClicked();
     void onButtonResetClicked();
     void onButtonResetLapHistoryClicked();
-    void CounterFinish(QString data);
+    void CounterFinish(QString Data);
     void HideLapWindow();
 
   signals:

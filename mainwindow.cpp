@@ -34,6 +34,8 @@ MainWindow::MainWindow(const QString& ImagePath)
 {
     StartFlag = 0;
 
+    QFontDatabase::addApplicationFont(":/fonts/Ressource/digital.ttf");
+
     QLabel* backgroundLabel = new QLabel(this);     // Parent is MainWindow
     backgroundLabel->setPixmap(QPixmap(ImagePath));
     backgroundLabel->lower(); // Push it below all other widgets
@@ -89,7 +91,8 @@ MainWindow::MainWindow(const QString& ImagePath)
     connect(buttonLap, &QPushButton::clicked, this, &MainWindow::onButtonLapClicked);
     connect(buttonReset, &QPushButton::clicked, this, &MainWindow::onButtonResetClicked);
 
-    QString StyleSheet("font-family: 'DS-Digital'; font-size: 48px; font-style: italic; font-weight: bold; color: #202020;");
+    QString StyleSheet = ("background-color: transparent; font-family: 'AR-Digital'; font-size: 48px; color: #202020;");
+    //QString StyleSheet("font-family: 'AR-Digital'; font-size: 48px; font-style: italic; font-weight: bold; color: #202020;");
 
     labelStaticLCD_100_Min = new QLabel("8", this);
     labelStaticLCD_100_Min->setStyleSheet(StyleSheet);
@@ -119,7 +122,8 @@ MainWindow::MainWindow(const QString& ImagePath)
     labelStaticLCD_1_HundredSEC->setStyleSheet(StyleSheet);
     labelStaticLCD_1_HundredSEC->move(228, 62);
 
-    StyleSheet = ("background-color: transparent; font-family: 'DS-Digital'; font-style: italic; font-size: 48px; font-weight: bold; color: white;");
+    StyleSheet = ("background-color: transparent; font-family: 'AR-Digital'; font-size: 48px; color: white;");
+ //   StyleSheet = ("background-color: transparent; font-family: 'AR-Digital'; font-style: italic; font-size: 48px; font-weight: bold; color: white;");
 
     labelLCD_100_Min = new QLabel(" ", this);
     labelLCD_100_Min->setStyleSheet(StyleSheet);
@@ -285,7 +289,7 @@ void MainWindow::onButtonLapClicked()
     {
         QPoint CurrentPosition = LapWindow->pos();                                      // Get the current position of the widget
         QPropertyAnimation* animation = new QPropertyAnimation(LapWindow, "pos");
-        animation->setDuration(1000);                                                   // Animation duration in milliseconds
+        animation->setDuration(500);                                                   // Animation duration in milliseconds
 
         animation->setStartValue(CurrentPosition);                                      // Starting position
         animation->setEndValue(QPoint(CurrentPosition.x(),
@@ -302,7 +306,7 @@ void MainWindow::HideLapWindow()
     {
         QPoint CurrentPosition = LapWindow->pos();                                      // Get the current position of the widget
         QPropertyAnimation* animation = new QPropertyAnimation(LapWindow, "pos");
-        animation->setDuration(1000);                                                   // Animation duration in milliseconds
+        animation->setDuration(500);                                                   // Animation duration in milliseconds
 
         animation->setStartValue(CurrentPosition);                            // Starting position
         animation->setEndValue(QPoint(CurrentPosition.x(),
@@ -329,9 +333,9 @@ void MainWindow::onButtonResetLapHistoryClicked()
 
 //*************************************************************************************************
 
-void MainWindow::CounterFinish(QString data)
+void MainWindow::CounterFinish(QString Data)
 {
-    UpdateLCD(data);
+    UpdateLCD(Data);
 
     if(StartFlag == 1)
     {

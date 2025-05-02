@@ -7,6 +7,7 @@ SOURCES      = main.cpp \
 TRANSLATIONS = Chronometer_la.ts
 #! [1]
 
+LIBS += -lgdi32
 
 QT += widgets
 

@@ -22,6 +22,8 @@
 
 #include "mainwindow.h"
 #include <QApplication>
+//#include <windows.h>
+//#include <wingdi.h>
 
 int main(int argc, char *argv[])
 {

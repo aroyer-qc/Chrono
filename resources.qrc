@@ -1,4 +1,7 @@
 <RCC>
+    <qresource prefix="/fonts">
+        <file>Ressource/digital.ttf</file>
+    </qresource>
     <qresource prefix="/icons">
         <file>Ressource/chrono.png</file>
         <file>Ressource/lap.png</file>

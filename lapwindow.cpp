@@ -50,7 +50,6 @@ LapWindow::LapWindow(QWidget* parent) : QWidget(parent), TextArea(this), LapCoun
         "   font-size: 13px;"
         "   font-weight: bold;"
         "   border: none;"
-        "   caret-color: transparent;"
         "}"
         "QScrollBar:vertical {"
         "   background: transparent;"
@@ -92,8 +91,9 @@ void LapWindow::ClearLaps()
     emit HideLapWindow();
 }
 
-void LapWindow::paintEvent(QPaintEvent* event)
+void LapWindow::paintEvent(QPaintEvent* Event)
 {
     QPainter painter(this);
     painter.drawPixmap(0, 0, BackgroundImage); // Draw the background image
+    Event->accept();
 }

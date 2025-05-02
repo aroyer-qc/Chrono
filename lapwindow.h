@@ -36,7 +36,7 @@ class LapWindow : public QWidget
 
     protected:
 
-        void paintEvent(QPaintEvent* event) override;
+        void paintEvent(QPaintEvent* Event) override;
 
     private:
 
