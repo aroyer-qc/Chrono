@@ -7,10 +7,10 @@
         <file>Ressource/lap.png</file>
         <file>Ressource/reset.png</file>
         <file>Ressource/stop.png</file>
-        <file>Ressource/clock.png</file>
         <file>Ressource/start.png</file>
         <file>Ressource/chronolap.png</file>
         <file>Ressource/cursor.png</file>
         <file>Ressource/handle.png</file>
+        <file>Ressource/chrono.ico</file>
     </qresource>
 </RCC>
